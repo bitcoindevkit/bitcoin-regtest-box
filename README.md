@@ -11,15 +11,20 @@ bitcoin repo and branch, as specified in the Dockerfile.
 
 ### Connect to and Control Nodes
 
-1. get docker container names
+1. view docker running containers
 
    `$ docker ps`
   
 1. exec shell in running docker node (optional, if you don't have bitcoin-cli installed outside of docker)
 
-   `$ docker exec -it bitcoin-regtest-box_bitcoind_1_1 bash`
+   `$ docker exec -it bitcoind_1 bash` or  
+   `$ docker exec -it bitcoind_2 bash`
   
-1. use bitcoin-cli to getblockchaininfo, getnewaddress, generatetoaddress, getwalletinfo, etc.
+1. use bitcoin-cli to getblockchaininfo, getnewaddress, generatetoaddress, getwalletinfo, etc.  
+   
+   if using bitcoin-cli outside of docker container:  
+   - bitcoind_1: rpcport=9332  
+   - bitcoind_2: rpcport=19332  
   
    `# bitcoin-cli -regtest -rpcuser=demo -rpcpassword=QgH_RQTjWVQpQjbsi_Ie6XtnMm4CgcVutbO7DIi0I_s= -rpcport=9332 getblockchaininfo`
    
