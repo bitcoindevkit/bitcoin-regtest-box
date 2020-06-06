@@ -1,7 +1,7 @@
 FROM alpine
 
 ENV BITCOIN_REPO=https://github.com/jimpo/bitcoin.git
-ENV BITCOIN_BRANCH=bip157-net
+ENV BITCOIN_BRANCH=master
 
 WORKDIR /opt/bitcoin
 
