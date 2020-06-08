@@ -1,6 +1,6 @@
 FROM alpine
 
-ENV BITCOIN_REPO=https://github.com/jimpo/bitcoin.git
+ENV BITCOIN_REPO=https://github.com/bitcoin/bitcoin.git
 ENV BITCOIN_BRANCH=master
 
 WORKDIR /opt/bitcoin

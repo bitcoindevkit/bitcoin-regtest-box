@@ -7,6 +7,7 @@ bitcoin repo and branch, as specified in the Dockerfile.
 
 1. Create and start docker containers
 
+   `$ docker-compose build`  
    `$ docker-compose up`
 
 ### Connect to and Control Nodes
