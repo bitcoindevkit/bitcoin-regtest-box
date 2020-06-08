@@ -5,7 +5,7 @@ services:
     build: .
     cap_add:
       - ALL
-    command: bitcoind -regtest -server -txindex=0 -prune=0 -blockfilterindex -peerblockfilters -rpcallowip=0.0.0.0/0 -rpcbind=0.0.0.0 -addnode=bitcoind_2:9333 -rpcauth=demo:de3f40908461af54db3ed177f011db6f$$1d384a79fa165e2b441a67589aa72623aa5f63833831784fc17ff8b4dcc8d185 -rpcport=9332 --datadir=/opt/bitcoin -port=9333
+    command: bitcoind -regtest -server -txindex=0 -prune=0 -blockfilterindex -peerblockfilters -fallbackfee=0.1 -rpcallowip=0.0.0.0/0 -rpcbind=0.0.0.0 -addnode=bitcoind_2:9333 -rpcauth=demo:de3f40908461af54db3ed177f011db6f$$1d384a79fa165e2b441a67589aa72623aa5f63833831784fc17ff8b4dcc8d185 -rpcport=9332 --datadir=/opt/bitcoin -port=9333
     ports:
         - 9333:9333
         - 9332:9332
@@ -16,7 +16,7 @@ services:
     build: .
     cap_add:
       - ALL
-    command: bitcoind -regtest -server -txindex=0 -prune=0 -blockfilterindex -peerblockfilters -rpcallowip=0.0.0.0/0 -rpcbind=0.0.0.0 -addnode=bitcoind_1:9333 -rpcauth=demo:de3f40908461af54db3ed177f011db6f$$1d384a79fa165e2b441a67589aa72623aa5f63833831784fc17ff8b4dcc8d185 -rpcport=9332 --datadir=/opt/bitcoin -port=9333
+    command: bitcoind -regtest -server -txindex=0 -prune=0 -blockfilterindex -peerblockfilters -fallbackfee=0.1 -rpcallowip=0.0.0.0/0 -rpcbind=0.0.0.0 -addnode=bitcoind_1:9333 -rpcauth=demo:de3f40908461af54db3ed177f011db6f$$1d384a79fa165e2b441a67589aa72623aa5f63833831784fc17ff8b4dcc8d185 -rpcport=9332 --datadir=/opt/bitcoin -port=9333
     ports:
       - 19333:9333
       - 19332:9332
