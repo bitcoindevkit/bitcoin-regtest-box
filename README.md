@@ -1,66 +1,99 @@
-# Purpose
+### Purpose
 
-The purpose of this project is to create a localhost bitcoin regtest network using a custom bitcoin repo and branch, as specified in the Dockerfile.
+This purpose of this project is to create bitcoind and electrs regtest docker images using a custom
+bitcoin repo and branch, as specified in the bitcoind/Dockerfile. These images can be used for
+github actions containers or for localhost testing. The electrs docker image is built on top of the
+bitcoind image.
 
-<br />
+To use in a github actions job:
 
-### Prerequisites
+   ```
+    test-electrum:
+        name: Test Electrum
+        runs-on: ubuntu-16.04
+        container: bitcoindevkit/electrs
+        env:
+          MAGICAL_RPC_AUTH: USER_PASS
+          MAGICAL_RPC_USER: admin
+          MAGICAL_RPC_PASS: passw
+          MAGICAL_RPC_URL: 127.0.0.1:18443
+          MAGICAL_ELECTRUM_URL: tcp://127.0.0.1:60401
+        ...
+   ```
+    
+To use for local testing:
 
-To enable the regtest network, you'll need [Docker](https://www.docker.com/) installed and running on your machine.
+   ```shell
+    export MAGICAL_RPC_AUTH=USER_PASS
+    export MAGICAL_RPC_USER=admin
+    export MAGICAL_RPC_PASS=passw
+    export MAGICAL_RPC_URL=127.0.0.1:18443
+    export MAGICAL_ELECTRUM_URL=tcp://127.0.0.1:60401
+    
+    docker run -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp --name electrs bitcoindevkit/electrs
+   ```
+    
+   in another shell, for example from the `bdk` project repo
+    
+   ```shell
+    cargo test --features test-electrum --no-default-features
+   ```
 
-Docker creates _containers_. Containers are self-sufficient, isolated from one another, and bundle their own software, libraries, and configuration files. Containers are great tools for the purpose of setting up regtest networks because they frontload the work of configuring and putting together the necessary software for given tasks; they are easy to configure and behave predictably on a very diverse range of operating systems.
+### Build local regtest bitcoind and electrs docker images
 
-The following commands create two containers on your local machine, complete with all necessary software for running a bitcoin regtest network. You can then tap into this network for your bitcoin testing needs.
+1. Build docker containers (only needed if you don't want to use the docker hub versions)
 
-<br />
+   ```shell
+   docker build -t bitcoindevkit/bitcoind bitcoind  
+   docker build -t bitcoindevkit/electrs electrs
+   ```
+   
+### Push docker images to docker hub
 
-### Start local bitcoind (regtest) nodes
+1. Login
 
-Create and start two docker containers:
+   `docker login`
+   
+1. Push images
 
-```bash
-# create the image
-$ docker-compose build
+   ```shell
+   docker push bitcoindevkit/bitcoind
+   docker push bitcoindevkit/electrs
+   ```
+   
+### Run local regtest bitcoind and electrs docker images
 
-# fire up the two containers
-$ docker-compose up
+1. Run just the bitcoind container
+    
+   `docker run -p 127.0.0.1:18443-18444:18443-18444/tcp --name bitcoind bitcoindevkit/bitcoind`
+   
+1. Kill and remove the bitcoind container
 
-# shut down the containers
-$ docker-compose down
-```
+   `docker container rm --force bitcoind`
 
-<br />
+1. Run the bitcoind + electrs container
 
-### Connect to and control nodes
+   `docker run -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp --name electrs bitcoindevkit/electrs`
 
-#### 1. View running containers
+1. Kill and remove the bitcoind + electrs container
 
-```bash
-$ docker ps
-```
+   `docker container rm --force electrs`
+  
+### Run bitcoin-cli command from bitcoind or electrs containers
+  
+1. Exec shell in a running docker container 
 
-#### 2. Interact with your network
-
-If you do not have `bitcoin-cli` installed outside of docker, you can use the following commands to access the shell from one of the two containers and use `bitcoin-cli` from there:
-
-```bash
-$ docker exec -it bitcoind_1 bash
-$ docker exec -it bitcoind_2 bash
-```
-
-Use `bitcoin-cli` to `getblockchaininfo`, `getnewaddress`, `generatetoaddress`, `getwalletinfo`, etc.
-
-```bash
-bitcoin-cli -regtest -rpcuser=user -rpcpassword=pass getblockchaininfo
-
-bitcoin-cli -regtest -rpcuser=user -rpcpassword=pass getnewaddress
-
-bitcoin-cli -regtest -rpcuser=user -rpcpassword=pass generatetoaddress 100 <newaddress>
-
-bitcoin-cli -regtest -rpcuser=user -rpcpassword=pass getwalletinfo
-```
-
-**_Note_**: If you are using `bitcoin-cli` outside of a docker container:
-
-- bitcoind_1: `rpcport=18443` (default for regtest)
-- bitcoind_2: `rpcport=18554`
+   `docker exec -it bitcoind bash` 
+   
+   or
+   
+   `docker exec -it electrs bash`
+   
+1. Run `bitcoin-cli` commands from docker exec shell
+   
+   ```shell
+   export GENERATE_ADDR=\`/root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw getnewaddress\` 
+   /root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw generatetoaddress 10 $GENERATE_ADDR
+   /root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw getwalletinfo
+   ```
+   etc.
