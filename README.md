@@ -63,37 +63,38 @@ To use for local testing:
    
 ### Run local regtest bitcoind and electrs docker images
 
-1. Run just the bitcoind container
+1. Run just the bitcoind container as a detached process and remove the container when it's killed 
     
-   `docker run -p 127.0.0.1:18443-18444:18443-18444/tcp --name bitcoind bitcoindevkit/bitcoind`
+   `docker run -d --rm -p 127.0.0.1:18443-18444:18443-18444/tcp --name bitcoind bitcoindevkit/bitcoind`
    
-1. Kill and remove the bitcoind container
+1. Kill the bitcoind container
 
-   `docker container rm --force bitcoind`
+   `docker kill bitcoind`
 
-1. Run the bitcoind + electrs container
+1. Run the bitcoind + electrs container as a detached process and remove the container when it's killed
 
-   `docker run -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp --name electrs bitcoindevkit/electrs`
+   `docker run -d --rm -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp --name electrs bitcoindevkit/electrs`
 
-1. Kill and remove the bitcoind + electrs container
+1. Kill the bitcoind + electrs container
 
-   `docker container rm --force electrs`
+   `docker kill electrs`
   
-### Run bitcoin-cli command from bitcoind or electrs containers
-  
-1. Exec shell in a running docker container 
+### Use aliases with electrs container for local regtest testing
 
-   `docker exec -it bitcoind bash` 
-   
-   or
-   
-   `docker exec -it electrs bash`
-   
-1. Run `bitcoin-cli` commands from docker exec shell
-   
+1. create aliases to start, stop, view logs and send cli commands to container
+
    ```shell
-   export GENERATE_ADDR=\`/root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw getnewaddress\` 
-   /root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw generatetoaddress 10 $GENERATE_ADDR
-   /root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw getwalletinfo
+   alias rtstart='docker run -d --rm -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp --name electrs bitcoindevkit/electrs'
+   alias rtstop='docker kill electrs'
+   alias rtlogs='docker container logs electrs'
+   alias rtcli='docker exec -it electrs /root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw $@'
    ```
-   etc.
+  
+1. use aliases to start container, view logs, run cli command, stop container
+
+   `rtstart`  
+   `rtlogs`  
+   `rtcli help`  
+   `rtcli getwalletinfo`  
+   `rtcli getnewaddress`  
+   `rtstop`  
