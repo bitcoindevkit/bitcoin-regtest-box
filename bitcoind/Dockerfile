@@ -6,13 +6,14 @@ WORKDIR /root
 
 ENV BITCOIN_REPO=https://github.com/bitcoin/bitcoin.git
 ENV BITCOIN_BRANCH=master
-ENV BITCOIN_TAG=v0.20.1
+ENV BITCOIN_TAG=v0.21.0
 
 RUN apt-get update && \
     apt-get install git build-essential libtool autotools-dev automake pkg-config \
     bsdmainutils python3 -y && \
     apt-get install libevent-dev libboost-system-dev libboost-filesystem-dev libboost-test-dev \
     libboost-thread-dev libdb-dev libdb++-dev -y && \
+    apt-get install libsqlite3-dev && \
     git clone $BITCOIN_REPO --branch $BITCOIN_BRANCH --single-branch
 
 RUN (cd bitcoin && git fetch --all --tags --prune && git checkout tags/$BITCOIN_TAG && \

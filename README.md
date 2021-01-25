@@ -99,4 +99,4 @@ To use for local testing:
    rtcli getwalletinfo    
    rtcli getnewaddress  
    rtstop  
-   ```  
+   ```

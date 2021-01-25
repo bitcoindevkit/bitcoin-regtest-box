@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo -e "\nStarting bitcoin node.\n"
-/root/bitcoind -regtest -server -daemon -fallbackfee=0.0002 -rpcuser=admin -rpcpassword=passw -rpcallowip=0.0.0.0/0 -rpcbind=0.0.0.0
+/root/bitcoind -regtest -server -daemon -fallbackfee=0.0002 -rpcuser=admin -rpcpassword=passw -rpcallowip=0.0.0.0/0 -rpcbind=0.0.0.0 -blockfilterindex=1 -peerblockfilters=1
 
 echo -e "\nWaiting for bitcoin node.\n"
 until /root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw getblockchaininfo; do
