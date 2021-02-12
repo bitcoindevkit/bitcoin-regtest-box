@@ -7,9 +7,11 @@ echo -e "\nWaiting for bitcoin node.\n"
 until /root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw getblockchaininfo; do
     sleep 1
 done
+echo -e "\nCreate bdk-test wallet.\n"
+/root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw createwallet bdk-test
 
 echo -e "\nGenerating 150 bitcoin blocks.\n"
-ADDR=$(/root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw getnewaddress)
+ADDR=$(/root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw -rpcwallet=bdk-test getnewaddress)
 /root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw generatetoaddress 150 $ADDR
 
 echo -e "\nStarting electrs node.\n"

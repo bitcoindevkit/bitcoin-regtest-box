@@ -11,24 +11,26 @@ To use in a github actions job:
     test-electrum:
         name: Test Electrum
         runs-on: ubuntu-16.04
-        container: bitcoindevkit/electrs
+        container: bitcoindevkit/electrs:<version>
         env:
-          MAGICAL_RPC_AUTH: USER_PASS
-          MAGICAL_RPC_USER: admin
-          MAGICAL_RPC_PASS: passw
-          MAGICAL_RPC_URL: 127.0.0.1:18443
-          MAGICAL_ELECTRUM_URL: tcp://127.0.0.1:60401
+          BDK_RPC_AUTH: USER_PASS
+          BDK_RPC_USER: admin
+          BDK_RPC_PASS: passw
+          BDK_RPC_URL: 127.0.0.1:18443
+          BDK_RPC_WALLET: bdk-test
+          BDK_ELECTRUM_URL: tcp://127.0.0.1:60401
         ...
    ```
     
 To use for local testing:
 
    ```shell
-    export MAGICAL_RPC_AUTH=USER_PASS
-    export MAGICAL_RPC_USER=admin
-    export MAGICAL_RPC_PASS=passw
-    export MAGICAL_RPC_URL=127.0.0.1:18443
-    export MAGICAL_ELECTRUM_URL=tcp://127.0.0.1:60401
+    export BDK_RPC_AUTH=USER_PASS
+    export BDK_RPC_USER=admin
+    export BDK_RPC_PASS=passw
+    export BDK_RPC_URL=127.0.0.1:18443
+    export BDK_RPC_WALLET=bdk-test
+    export BDK_ELECTRUM_URL=tcp://127.0.0.1:60401
     
     docker run -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp --name electrs bitcoindevkit/electrs
    ```
@@ -44,8 +46,8 @@ To use for local testing:
 1. Build docker containers (only needed if you don't want to use the docker hub versions)
 
    ```shell
-   docker build -t bitcoindevkit/bitcoind bitcoind  
-   docker build -t bitcoindevkit/electrs electrs
+   docker build -t bitcoindevkit/bitcoind:<version> bitcoind  
+   docker build -t bitcoindevkit/electrs:<version> electrs
    ```
    
 ### Push docker images to docker hub
@@ -54,11 +56,11 @@ To use for local testing:
 
    `docker login`
    
-1. Push images
+1. Push images, where <version> is current tagged version of this repo
 
    ```shell
-   docker push bitcoindevkit/bitcoind
-   docker push bitcoindevkit/electrs
+   docker push bitcoindevkit/bitcoind:<version>
+   docker push bitcoindevkit/electrs:<version>
    ```
    
 ### Run local regtest bitcoind and electrs docker images

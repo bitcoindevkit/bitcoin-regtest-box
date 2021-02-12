@@ -15,7 +15,7 @@ RUN apt-get update && \
 
 RUN cargo install --git https://github.com/romanz/electrs --bin electrs
 
-FROM bitcoindevkit/bitcoind
+FROM bitcoindevkit/bitcoind:0.2.0
 
 COPY --from=builder /root/.cargo/bin/electrs /root
 
