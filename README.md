@@ -32,7 +32,7 @@ To use for local testing:
     export BDK_RPC_WALLET=bdk-test
     export BDK_ELECTRUM_URL=tcp://127.0.0.1:60401
     
-    docker run -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp --name electrs bitcoindevkit/electrs
+    docker run -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp --name electrs bitcoindevkit/electrs:<version>
    ```
     
    in another shell, for example from the `bdk` project repo
@@ -56,11 +56,21 @@ To use for local testing:
 
    `docker login`
    
-1. Push images, where <version> is current tagged version of this repo
+1. Push new tagged images, where <version> is new git tag for this repo
 
    ```shell
    docker push bitcoindevkit/bitcoind:<version>
    docker push bitcoindevkit/electrs:<version>
+   ```
+   
+1. Build and push update `latest` image versions as needed
+
+   ```shell
+   docker build -t bitcoindevkit/bitcoind:latest bitcoind  
+   docker build -t bitcoindevkit/electrs:latest electrs
+   
+   docker push bitcoindevkit/bitcoind:latest
+   docker push bitcoindevkit/electrs:latest
    ```
    
 ### Run local regtest bitcoind and electrs docker images
