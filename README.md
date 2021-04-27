@@ -11,8 +11,9 @@ top of the custom bitcoind image.
 
 Below are examples of how to use the images created by this project in github actions jobs:
 
-    #### electrum test job 
-    ```
+#### electrum test job 
+    
+   ```
     test-electrum:
         name: Test Electrum
         runs-on: ubuntu-16.04
@@ -25,10 +26,11 @@ Below are examples of how to use the images created by this project in github ac
           BDK_RPC_WALLET: bdk-test
           BDK_ELECTRUM_URL: tcp://127.0.0.1:60401
         ...
-    ```
+   ```
    
-    #### esplora test job
-    ```
+#### esplora test job
+    
+   ```
     test-esplora:
         name: Test Esplora
         runs-on: ubuntu-16.04
@@ -42,7 +44,7 @@ Below are examples of how to use the images created by this project in github ac
           BDK_ELECTRUM_URL: tcp://127.0.0.1:60401
           BDK_ESPLORA_URL: http://127.0.0.1:3002
         ...
-    ```
+   ```
     
 ### Local `bdk` testing
 
@@ -71,7 +73,7 @@ Below is an example of how to run `bdk` electrum tests locally using the electrs
 Below is an example of how to test `bdk-cli` with electrum or esplora server APIs locally using the 
 esplora docker image:
 
-    ```shell
+   ```shell
     # start esplora docker container
     docker run -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp -p 127.0.0.1:3002:3002/tcp --name esplora bitcoindevkit/esplora
     
@@ -83,7 +85,7 @@ esplora docker image:
     
     # kill the esplora container when you're done
     docker kill esplora   
-    ```
+   ```
   
 ### Create aliases with the electrs container for local regtest electrum testing
 
