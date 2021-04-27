@@ -24,7 +24,6 @@ RUN chmod a+rx /root/electrs
 
 EXPOSE 18443 18444 60401
 
-ADD config.toml /etc/electrs/config.toml
 ADD entrypoint.sh /root/entrypoint.sh
 RUN chmod a+x /root/entrypoint.sh
 
