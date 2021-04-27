@@ -15,4 +15,4 @@ ADDR=$(/root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw -rpcwallet=b
 /root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw generatetoaddress 150 $ADDR
 
 echo -e "\nStarting electrs node.\n"
-/root/electrs --network regtest -vvv --cookie admin:passw --jsonrpc-import --electrum-rpc-addr=0.0.0.0:60401
+/root/electrs --network regtest -vvv --jsonrpc-import
