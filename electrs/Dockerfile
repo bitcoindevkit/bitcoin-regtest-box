@@ -13,9 +13,9 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install -y libllvm10 clang-10 libclang-common-10-dev curl cargo
 
-RUN cargo install --git https://github.com/romanz/electrs --bin electrs
+RUN cargo install --git https://github.com/romanz/electrs --tag v0.8.10 --bin electrs
 
-FROM bitcoindevkit/bitcoind:0.2.0
+FROM bitcoindevkit/bitcoind:0.3.0
 
 COPY --from=builder /root/.cargo/bin/electrs /root
 
