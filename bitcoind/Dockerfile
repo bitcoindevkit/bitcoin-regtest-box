@@ -6,7 +6,7 @@ WORKDIR /root
 
 ENV BITCOIN_REPO=https://github.com/bitcoin/bitcoin.git
 ENV BITCOIN_BRANCH=master
-ENV BITCOIN_TAG=v0.21.0
+ENV BITCOIN_TAG=v0.21.1
 
 RUN apt-get update && \
     apt-get install git build-essential libtool autotools-dev automake pkg-config \
