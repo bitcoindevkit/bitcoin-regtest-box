@@ -19,9 +19,8 @@ Below are examples of how to use the images created by this project in github ac
         runs-on: ubuntu-16.04
         container: bitcoindevkit/electrs:<version>
         env:
-          BDK_RPC_AUTH: USER_PASS
-          BDK_RPC_USER: admin
-          BDK_RPC_PASS: passw
+          BDK_RPC_AUTH: COOKIEFILE
+          BDK_RPC_COOKIEFILE: /root/.bitcoin/regtest/.cookie
           BDK_RPC_URL: 127.0.0.1:18443
           BDK_RPC_WALLET: bdk-test
           BDK_ELECTRUM_URL: tcp://127.0.0.1:60401
@@ -36,9 +35,8 @@ Below are examples of how to use the images created by this project in github ac
         runs-on: ubuntu-16.04
         container: bitcoindevkit/esplora:<version>
         env:
-          BDK_RPC_AUTH: USER_PASS
-          BDK_RPC_USER: admin
-          BDK_RPC_PASS: passw
+          BDK_RPC_AUTH: COOKIEFILE
+          BDK_RPC_COOKIEFILE: /root/.bitcoin/regtest/.cookie
           BDK_RPC_URL: 127.0.0.1:18443
           BDK_RPC_WALLET: bdk-test
           BDK_ELECTRUM_URL: tcp://127.0.0.1:60401
@@ -48,25 +46,58 @@ Below are examples of how to use the images created by this project in github ac
     
 ### Local `bdk` testing
 
-Below is an example of how to run `bdk` electrum tests locally using the electrs docker image:
+Below is an example of how to run `bdk` electrum blockchain tests locally using the electrs docker image:
 
    ```shell
     # start the electrs docker container
-    docker run -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp --name electrs bitcoindevkit/electrs
+    docker run -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp --detach --rm --name electrs bitcoindevkit/electrs
    
-    # in new shell from the `bdk` project repo directory run electrum integration tests
-    export BDK_RPC_AUTH=USER_PASS
-    export BDK_RPC_USER=admin
-    export BDK_RPC_PASS=passw
+    # confirm electrs is running
+    docker logs electrs
+   
+    # get a copy of the bitcoind .cookie file
+    # this needs to be done each time you run the container because the cookie file will change
+    docker cp electrs:/root/.bitcoin/regtest/.cookie /tmp/regtest.cookie
+   
+    # in new shell from the `bdk` project repo directory run blockchains integration tests
+    export BDK_RPC_AUTH=COOKIEFILE
+    export BDK_RPC_COOKIEFILE=/tmp/regtest.cookie
     export BDK_RPC_URL=127.0.0.1:18443
     export BDK_RPC_WALLET=bdk-test
     export BDK_ELECTRUM_URL=tcp://127.0.0.1:60401
     
-    cargo test --features test-electrum --no-default-features
+    cargo test --features electrum,test-blockchains --no-default-features electrum::bdk_blockchain_tests
     
     # kill the electrs container when you're done
     docker kill electrs
    ```
+   
+Below is an example of how to run `bdk` esplora blockchain tests locally using the esplora docker image:
+
+  ```shell
+   # start the esplora docker container
+   docker run -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp -p 127.0.0.1:3002:3002/tcp --detach --rm --name esplora bitcoindevkit/esplora
+  
+   # confirm esplora is running
+   docker logs esplora
+       
+   # get a copy of the bitcoind .cookie file
+   # this needs to be done each time you run the container because the cookie file will change
+   docker cp esplora:/root/.bitcoin/regtest/.cookie /tmp/regtest.cookie
+  
+   # in new shell from the `bdk` project repo directory run blockchains integration tests
+   export BDK_RPC_AUTH=COOKIEFILE
+   export BDK_RPC_COOKIEFILE=/tmp/regtest.cookie
+   export BDK_RPC_URL=127.0.0.1:18443
+   export BDK_RPC_WALLET=bdk-test
+   export BDK_ELECTRUM_URL=tcp://127.0.0.1:60401
+   export BDK_ESPLORA_URL=http://127.0.0.1:3002
+   
+   cargo test --features esplora,test-blockchains --no-default-features esplora::bdk_blockchain_tests
+   
+   # kill the esplora container when you're done
+   docker kill esplora
+  ```
    
 ### Local `bdk-cli` testing
 
@@ -75,7 +106,7 @@ esplora docker image:
 
    ```shell
     # start esplora docker container
-    docker run -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp -p 127.0.0.1:3002:3002/tcp --name esplora bitcoindevkit/esplora
+    docker run -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp -p 127.0.0.1:3002:3002/tcp --detach --rm --name esplora bitcoindevkit/esplora
     
     # in a new shell sync wallet via the electrum APIs
     bdk-cli -n regtest wallet --server tcp://127.0.0.1:60401 --descriptor "wpkh(tpubEBr4i6yk5nf5DAaJpsi9N2pPYBeJ7fZ5Z9rmN4977iYLCGco1VyjB9tvvuvYtfZzjD5A8igzgw3HeWeeKFmanHYqksqZXYXGsw5zjnj7KM9/*)" sync     
@@ -90,19 +121,19 @@ esplora docker image:
 ### Create aliases with the electrs container for local regtest electrum testing
 
    ```shell
-   alias elstart='docker run -d --rm -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp --name electrs bitcoindevkit/electrs'
+   alias elstart='docker run --detach --rm -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp --name electrs bitcoindevkit/electrs'
    alias elstop='docker kill electrs'
    alias ellogs='docker container logs electrs'
-   alias elcli='docker exec -it electrs /root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw $@'
+   alias elcli='docker exec -it electrs /root/bitcoin-cli -regtest -datadir=/root/.bitcoin $@'
    ```
    
 ### Use aliases with the esplora container for local regtest electrum and esplora testing
 
    ```shell
-   alias esstart='docker run -d --rm -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp -p 127.0.0.1:3002:3002/tcp --name esplora bitcoindevkit/esplora'
+   alias esstart='docker run --detach --rm -p 127.0.0.1:18443-18444:18443-18444/tcp -p 127.0.0.1:60401:60401/tcp -p 127.0.0.1:3002:3002/tcp --name esplora bitcoindevkit/esplora'
    alias esstop='docker kill esplora'
    alias eslogs='docker container logs esplora'
-   alias escli='docker exec -it esplora /root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw $@'
+   alias escli='docker exec -it esplora /root/bitcoin-cli -regtest -datadir=/root/.bitcoin $@'
    ```
   
 ### Use aliases to start an electrum container, view logs, run bitcoind cli commands, and stop the container

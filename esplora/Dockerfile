@@ -17,7 +17,7 @@ RUN git clone https://github.com/blockstream/electrs
 WORKDIR electrs
 RUN cargo build --release --bin electrs
 
-FROM bitcoindevkit/bitcoind:0.3.0
+FROM bitcoindevkit/bitcoind:0.4.0
 
 COPY --from=builder /root/electrs/target/release/electrs /root
 

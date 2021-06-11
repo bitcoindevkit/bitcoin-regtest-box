@@ -1,18 +1,18 @@
 #!/bin/bash
 
 echo -e "\nStarting bitcoin node.\n"
-/root/bitcoind -regtest -server -daemon -fallbackfee=0.0002 -rpcuser=admin -rpcpassword=passw -rpcallowip=0.0.0.0/0 -rpcbind=0.0.0.0 -blockfilterindex=1 -peerblockfilters=1
+/root/bitcoind -regtest -server -daemon -fallbackfee=0.0002 -rpcallowip=0.0.0.0/0 -rpcbind=0.0.0.0 -blockfilterindex=1 -peerblockfilters=1
 
 echo -e "\nWaiting for bitcoin node.\n"
-until /root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw getblockchaininfo; do
+until /root/bitcoin-cli -regtest -datadir=/root/.bitcoin getblockchaininfo; do
     sleep 1
 done
 echo -e "\nCreate bdk-test wallet.\n"
-/root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw createwallet bdk-test
+/root/bitcoin-cli -regtest -datadir=/root/.bitcoin createwallet bdk-test
 
 echo -e "\nGenerating 150 bitcoin blocks.\n"
-ADDR=$(/root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw -rpcwallet=bdk-test getnewaddress)
-/root/bitcoin-cli -regtest -rpcuser=admin -rpcpassword=passw generatetoaddress 150 $ADDR
+ADDR=$(/root/bitcoin-cli -regtest -datadir=/root/.bitcoin -rpcwallet=bdk-test getnewaddress)
+/root/bitcoin-cli -regtest -datadir=/root/.bitcoin generatetoaddress 150 $ADDR
 
 echo -e "\nStarting esplora electrs node.\n"
-/root/electrs --network regtest -vvv --cookie admin:passw --jsonrpc-import --electrum-rpc-addr=0.0.0.0:60401 --http-addr 0.0.0.0:3002
+/root/electrs --network regtest -vvv --daemon-dir /root/.bitcoin --jsonrpc-import --electrum-rpc-addr=0.0.0.0:60401 --http-addr 0.0.0.0:3002
