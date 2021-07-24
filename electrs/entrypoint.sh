@@ -15,4 +15,4 @@ ADDR=$(/root/bitcoin-cli -regtest -datadir=/root/.bitcoin -rpcwallet=bdk-test ge
 /root/bitcoin-cli -regtest -datadir=/root/.bitcoin generatetoaddress 150 $ADDR
 
 echo -e "\nStarting electrs node.\n"
-/root/electrs --network regtest --cookie-file /root/.bitcoin/regtest/.cookie -vvv --jsonrpc-import
+/root/electrs --network regtest --cookie-file /root/.bitcoin/regtest/.cookie --txid-limit 0 -vvv --jsonrpc-import
