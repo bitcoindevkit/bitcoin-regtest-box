@@ -1,11 +1,81 @@
+# THIS PROJECT IS NO LONGER ACTIVELY MAINTAINED
+
 ### Purpose
 
-This purpose of this project is to create docker images that can be used to run `bdk` regtest 
-network tests locally and via github actions with a custom bitcoind version. The docker images are 
-created for bitcoind and the original romanz/electrs electrum API server or the Blockstream/electrs 
-electrum + esplora API server. The bitcoind docker image is built using a custom bitcoin repo and 
-tag, as specified in the bitcoind/Dockerfile. The electrs and esplora docker images are built on 
-top of the custom bitcoind image.
+Originally the [`bdk`] project used the images created by this repo for github actions integration 
+testing for its `electrum` and `esplora` blockchain client modules. But the new solution for [`bdk`] 
+blockchain testing is to use the [`bitcoind`] and [`electrsd`] rust crates which are easier to 
+maintain, allow parallel testing, and don't require docker. For local [`bdk`] and [`bdk-cli`] testing 
+_without_ using this repo see below instructions.
+
+### Local BDK Testing
+
+To run the blockchain integration tests for [`bdk`] the required daemons are now automatically
+installed, started, and stopped by `cargo test`, all you need to do is specify the correct features.
+
+**NOTE**: On a MacOS system you will get pop-up warnings that you must click "OK" for.
+    
+For example, from your clone of [`bdk`]: 
+```shell
+cargo test --no-default-features --features test-electrum electrum::bdk_blockchain_tests
+cargo test --no-default-features --features test-rpc rpc::bdk_blockchain_tests
+cargo test --no-default-features --features test-esplora,use-esplora-reqwest esplora::bdk_blockchain_tests
+cargo test --no-default-features --features test-esplora,use-esplora-ureq esplora::bdk_blockchain_tests
+```
+
+### Local BDK-CLI Testing
+
+To manually test [`bdk-cli`] in regtest mode with locally installed `bitcoind` and `electrs` daemons 
+you will need to install them yourself.
+
+1. Manually download and install the [bitcoincore.org `bitcoind`] daemon and `bitcoin-cli` binaries
+2. Build from source and install the [romanz `electrs`] daemon
+3. Install [`bdk-cli`] from your clone with `cargo install --features electrum --path .` or from 
+   crates.io `cargo install --features electrum bdk-cli`
+
+With all above binaries in your local local `$PATH` you can run them in `regtest` mode and use them 
+for manual `bdk-cli` testing like this:
+
+```shell
+mkdir -p /tmp/regtest1/bitcoind /tmp/regtest1/electrs
+bitcoind -datadir=/tmp/regtest1/bitcoind -regtest -server -fallbackfee=0.0002 -rpcallowip=0.0.0.0/0 -rpcbind=0.0.0.0 -blockfilterindex=1 -peerblockfilters=1 -daemon
+electrs --daemon-dir /tmp/regtest1/bitcoind --db-dir /tmp/regtest1/electrs --network regtest
+```
+
+In a new shell: 
+```shell
+# 1. create bitcoind test wallet and generate regtest test coins
+bitcoin-cli -regtest -datadir=/tmp/regtest1/bitcoind createwallet bdk-test
+GEN_ADDRESS=$(bitcoin-cli -regtest -datadir=/tmp/regtest1/bitcoind getnewaddress)
+bitcoin-cli -regtest -datadir=/tmp/regtest1/bitcoind generatetoaddress 101 $GEN_ADDRESS
+
+# 2. sync wallet via the electrum APIs
+DESCRIPTOR="wpkh(tpubEBr4i6yk5nf5DAaJpsi9N2pPYBeJ7fZ5Z9rmN4977iYLCGco1VyjB9tvvuvYtfZzjD5A8igzgw3HeWeeKFmanHYqksqZXYXGsw5zjnj7KM9/*)"
+bdk-cli -n regtest wallet --server tcp://127.0.0.1:60401 --descriptor $DESCRIPTOR sync     
+ 
+# 3. receive a deposit
+DEPOSIT_ADDRESS=$(bdk-cli -n regtest wallet --server tcp://127.0.0.1:60401 --descriptor $DESCRIPTOR get_new_address | jq '.address' | tr -d '"')
+bitcoin-cli -regtest -datadir=/tmp/regtest1/bitcoind sendtoaddress $DEPOSIT_ADDRESS 10
+bitcoin-cli -regtest -datadir=/tmp/regtest1/bitcoind generatetoaddress 1 $GEN_ADDRESS
+bdk-cli -n regtest wallet --server tcp://127.0.0.1:60401 --descriptor $DESCRIPTOR sync 
+bdk-cli -n regtest wallet --server tcp://127.0.0.1:60401 --descriptor $DESCRIPTOR get_balance
+ 
+# 4. kill the electrs and bitcoind containers when you're done
+pkill electrs bitcoind
+
+# 5. remove the /tmp data
+rm -rf /tmp/regtest1
+rm -rf ~/.bdk-bitcoin
+```
+
+[`bdk`]: https://github.com/bitcoindevkit/bdk
+[`bdk-cli`]: https://github.com/bitcoindevkit/bdk-cli
+[`bitcoind`]: https://github.com/rcasatta/bitcoind
+[`electrsd`]: https://github.com/rcasatta/electrsd
+[bitcoincore.org `bitcoind`]: https://bitcoincore.org/en/download/
+[romanz `electrs`]: https://github.com/romanz/electrs
+
+## OLD DOCS BELOW
 
 ### Github actions
 
